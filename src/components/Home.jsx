@@ -7,11 +7,25 @@ import { useRouter } from "next/navigation";
 const Home = () => {
   const router = useRouter();
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
+    localStorage.removeItem("selectedFiles");
     const files = e.target.files;
-    console.log(files);
-    // Navigate to the file preview page
-    router.push("/file-preview");
+    const formData = new FormData();
+
+    Array.from(files).forEach((file) => formData.append("files", file));
+
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      localStorage.setItem("selectedFiles", JSON.stringify(result.files));
+      router.push("/file-preview");
+    } else {
+      console.error("Upload failed:", result.error);
+    }
   };
 
   return (
