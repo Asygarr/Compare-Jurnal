@@ -15,10 +15,6 @@ const FilePreview = () => {
   }, []);
 
   const handleCompare = async () => {
-    console.log({
-      files: files.map((file) => file.path),
-    });
-
     try {
       const response = await fetch("/api/compare", {
         method: "POST",
@@ -76,13 +72,15 @@ const FilePreview = () => {
               Comparison Results
             </h3>
             <div className="space-y-4">
-              {comparisonResult.map((abstract, index) => (
+              {comparisonResult.map((abstracts, index) => (
                 <div
                   key={index}
                   className="p-4 bg-gray-100 border rounded text-gray-700"
                 >
                   <strong>File {index + 1}:</strong>
-                  <p className="mt-2 whitespace-pre-wrap">{abstract}</p>
+                  <p className="mt-2 whitespace-pre-wrap">
+                    {abstracts?.abstract}
+                  </p>
                 </div>
               ))}
             </div>
