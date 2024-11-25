@@ -27,8 +27,8 @@ export async function extractAbstractsFromFiles(files) {
 
 // Fungsi untuk mengambil teks abstrak
 function extractAbstract(text) {
-  const abstractStart = /abstract/i; // Kata kunci awal abstrak
-  const abstractEnd = /introduction|background|chapter 1/i; // Kata kunci akhir abstrak
+  const abstractStart = /abstract|abstrak/i; // Kata kunci awal abstrak
+  const abstractEnd = /kata kunci|keywords|introduction|background|chapter 1/i; // Kata kunci akhir abstrak
 
   const startMatch = text.match(abstractStart);
   const endMatch = text.match(abstractEnd);
