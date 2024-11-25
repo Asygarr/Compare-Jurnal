@@ -16,10 +16,15 @@ export async function POST(req) {
 
     for (const file of files) {
       const buffer = Buffer.from(await file.arrayBuffer());
-      const filePath = path.join(uploadDir, file.name);
+
+      const sanitizedFileName = file.name.replace(/\s+/g, "_");
+      const filePath = path.join(uploadDir, sanitizedFileName);
 
       fs.writeFileSync(filePath, buffer);
-      fileInfos.push({ name: file.name, path: `/uploads/${file.name}` });
+      fileInfos.push({
+        name: sanitizedFileName,
+        path: `/uploads/${sanitizedFileName}`,
+      });
     }
 
     return NextResponse.json({ files: fileInfos });

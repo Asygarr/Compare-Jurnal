@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 
 const FilePreview = () => {
   const [files, setFiles] = useState([]);
+  const [comparisonResult, setComparisonResult] = useState(null); // Untuk menyimpan hasil
 
   useEffect(() => {
     const storedFiles = localStorage.getItem("selectedFiles");
@@ -13,18 +14,34 @@ const FilePreview = () => {
     }
   }, []);
 
-  const handleCompare = () => {
-    console.log(
-      "Files to compare:",
-      files.map((file) => file.path)
-    );
-    alert("Compare button clicked. Check console for file paths.");
+  const handleCompare = async () => {
+    console.log({
+      files: files.map((file) => file.path),
+    });
+
+    try {
+      const response = await fetch("/api/compare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ files: files.map((file) => file.path) }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      setComparisonResult(result.abstracts); // Simpan hasil ke state
+    } catch (error) {
+      console.error("Error comparing files:", error.message);
+      setComparisonResult(["Error processing comparison."]);
+    }
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <Navbar />
-      <main className="flex flex-col items-center justify-center mt-13 w-full px-4">
+      <main className="flex flex-col items-center justify-center w-full overflow-y-auto min-h-screen pt-24 pb-10">
         <h2 className="text-3xl font-semibold mb-4 text-red-600">
           File Preview
         </h2>
@@ -34,7 +51,9 @@ const FilePreview = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
           {files.map((file, index) => (
             <div key={index} className="bg-white p-4 shadow rounded">
-              <h3 className="font-semibold text-lg mb-2">{file.name}</h3>
+              <h3 className="font-semibold text-lg mb-2 text-red-600">
+                {file.name}
+              </h3>
               <iframe
                 src={file.path}
                 className="w-full h-64 border"
@@ -49,6 +68,26 @@ const FilePreview = () => {
         >
           Compare
         </button>
+
+        {/* Tampilkan hasil di sini */}
+        {comparisonResult && (
+          <div className="mt-8 w-full max-w-4xl bg-white p-6 shadow rounded">
+            <h3 className="font-semibold text-lg text-red-600 mb-4">
+              Comparison Results
+            </h3>
+            <div className="space-y-4">
+              {comparisonResult.map((abstract, index) => (
+                <div
+                  key={index}
+                  className="p-4 bg-gray-100 border rounded text-gray-700"
+                >
+                  <strong>File {index + 1}:</strong>
+                  <p className="mt-2 whitespace-pre-wrap">{abstract}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
