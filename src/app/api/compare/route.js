@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { extractAbstractsFromFiles } from "@/utils/processPDF";
 import { getSimilarityFromPython } from "@/utils/callBERT";
+import { generateCreativeResponse } from "@/utils/callGPT";
 
 // test get path
 export async function GET() {
@@ -18,6 +19,11 @@ export async function POST(request) {
       const text2 = abstractsDanSaran[1].abstract;
 
       const similarityScore = await getSimilarityFromPython(text1, text2);
+      const creativeResponse = await generateCreativeResponse(
+        text1,
+        text2,
+        similarityScore
+      );
 
       return NextResponse.json({
         success: true,
@@ -27,6 +33,7 @@ export async function POST(request) {
           text2,
           score: similarityScore,
         },
+        creativeResponse,
       });
     } else {
       return NextResponse.json(
