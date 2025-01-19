@@ -27,7 +27,7 @@ const FilePreview = () => {
       }
 
       const result = await response.json();
-      setComparisonResult(result.abstracts); // Simpan hasil ke state
+      setComparisonResult(result.similarity);
     } catch (error) {
       console.error("Error comparing files:", error.message);
       setComparisonResult(["Error processing comparison."]);
@@ -72,17 +72,23 @@ const FilePreview = () => {
               Comparison Results
             </h3>
             <div className="space-y-4">
-              {comparisonResult.map((abstracts, index) => (
-                <div
-                  key={index}
-                  className="p-4 bg-gray-100 border rounded text-gray-700"
-                >
-                  <strong>File {index + 1}:</strong>
+              {/* {comparisonResult.map((abstracts, index) => ( */}
+              <div
+                // key={index}
+                className="p-4 bg-gray-100 border rounded text-gray-700"
+              >
+                <strong>similarity score: {comparisonResult.score}</strong>
+                {/* <strong>File {abstracts?.file}:</strong>
+                  <h5>Abstrak</h5>
                   <p className="mt-2 whitespace-pre-wrap">
                     {abstracts?.abstract}
                   </p>
-                </div>
-              ))}
+                  <h5>Kesimpulan Dan Saran</h5>
+                  <p className="mt-2 whitespace-pre-wrap">
+                    {abstracts?.kesimpulanDanSaran}
+                  </p> */}
+              </div>
+              {/* ))} */}
             </div>
           </div>
         )}

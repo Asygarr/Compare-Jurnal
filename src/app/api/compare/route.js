@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { extractAbstractsFromFiles } from "@/utils/processPDF";
+import { getSimilarityFromPython } from "@/utils/callBERT";
 
 // test get path
 export async function GET() {
@@ -8,12 +9,32 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const { files } = await request.json(); // Path file yang dikirim dari frontend
+    const { files } = await request.json();
 
-    // memanggil fungsi extractAbstractsFromFiles
-    const abstracts = await extractAbstractsFromFiles(files);
+    const abstractsDanSaran = await extractAbstractsFromFiles(files);
 
-    return NextResponse.json({ success: true, abstracts });
+    if (abstractsDanSaran.length >= 2) {
+      const text1 = abstractsDanSaran[0].abstract;
+      const text2 = abstractsDanSaran[1].abstract;
+
+      const similarityScore = await getSimilarityFromPython(text1, text2);
+
+      return NextResponse.json({
+        success: true,
+        abstractsDanSaran,
+        similarity: {
+          text1,
+          text2,
+          score: similarityScore,
+        },
+      });
+    } else {
+      return NextResponse.json(
+        { error: "At least two abstracts are required for comparison" },
+        { status: 400 }
+      );
+    }
+    // return NextResponse.json({ success: true, abstractsDanSaran });
   } catch (error) {
     console.error("Error processing files:", error);
     return NextResponse.json(

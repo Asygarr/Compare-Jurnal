@@ -3,32 +3,32 @@ import pdfParse from "pdf-parse";
 import path from "path";
 
 export async function extractAbstractsFromFiles(files) {
-  const abstracts = [];
+  const abstractsDanKesimpulanSaran = [];
 
-  // Ambil teks abstrak dari setiap file PDF
   for (const filePath of files) {
     const fullPath = path.join(process.cwd(), "public", filePath);
     const fileBuffer = fs.readFileSync(fullPath);
 
-    // Baca teks dari file PDF
     const pdfData = await pdfParse(fileBuffer);
+    const fileName = fullPath.split(path.sep).pop();
+    const formattedFileName = fileName.replace(/_/g, " ");
 
-    // Ekstrak abstrak
     const abstractText = extractAbstract(pdfData.text);
+    const kesimpulanSaranText = extractKesimpulan(pdfData.text);
 
-    // Tambahkan abstrak ke array
-    abstracts.push({ file: filePath, abstract: abstractText });
+    abstractsDanKesimpulanSaran.push({
+      file: formattedFileName,
+      abstract: abstractText,
+      kesimpulanDanSaran: kesimpulanSaranText,
+    });
   }
 
-  console.log(abstracts);
-
-  return abstracts;
+  return abstractsDanKesimpulanSaran;
 }
 
-// Fungsi untuk mengambil teks abstrak
 function extractAbstract(text) {
-  const abstractStart = /abstract|abstrak/i; // Kata kunci awal abstrak
-  const abstractEnd = /kata kunci|keywords|introduction|background|chapter 1/i; // Kata kunci akhir abstrak
+  const abstractStart = /abstrak|abstract/i;
+  const abstractEnd = /kata kunci|keywords|introduction|background|chapter 1/i;
 
   const startMatch = text.match(abstractStart);
   const endMatch = text.match(abstractEnd);
@@ -39,4 +39,48 @@ function extractAbstract(text) {
     return text.slice(startIndex, endIndex).trim();
   }
   return "Abstract not found.";
+}
+
+function extractKesimpulan(text) {
+  const kesimpulanSaranStart = /kesimpulan/gi;
+  const kesimpulanSaranEnd =
+    /daftar pustaka|referensi|ucapan terima kasih|references/i;
+
+  // Cari semua kemunculan "kesimpulan"
+  const allMatches = [...text.matchAll(kesimpulanSaranStart)];
+  if (allMatches.length === 0) {
+    return "Kesimpulan dan Saran not found.";
+  }
+
+  // Ambil "kesimpulan" terakhir
+  const startMatch = allMatches[allMatches.length - 1];
+  const startIndex = startMatch.index;
+
+  // Cari batas akhir dari section
+  const endMatch = text.slice(startIndex).match(kesimpulanSaranEnd);
+  const endIndex = endMatch ? startIndex + endMatch.index : text.length;
+
+  return text.slice(startIndex, endIndex).trim();
+}
+
+function extractSaran(text) {
+  const kesimpulanSaranStart = /saran/gi;
+  const kesimpulanSaranEnd =
+    /daftar pustaka|referensi|ucapan terima kasih|references/i;
+
+  // Cari semua kemunculan "kesimpulan"
+  const allMatches = [...text.matchAll(kesimpulanSaranStart)];
+  if (allMatches.length === 0) {
+    return 0;
+  }
+
+  // Ambil "kesimpulan" terakhir
+  const startMatch = allMatches[allMatches.length - 1];
+  const startIndex = startMatch.index;
+
+  // Cari batas akhir dari section
+  const endMatch = text.slice(startIndex).match(kesimpulanSaranEnd);
+  const endIndex = endMatch ? startIndex + endMatch.index : text.length;
+
+  return text.slice(startIndex, endIndex).trim();
 }
