@@ -77,7 +77,7 @@ const FilePreview = () => {
                 <div
                   className="whitespace-pre-wrap"
                   dangerouslySetInnerHTML={formatMarkdownResponse(
-                    comparisonResult.creativeResponse
+                    comparisonResult.creativeResponse.modelGPT
                   )}
                 />
               </div>

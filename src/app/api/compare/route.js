@@ -27,13 +27,15 @@ export async function POST(request) {
 
       return NextResponse.json({
         success: true,
-        abstractsDanSaran,
+        // abstractsDanSaran,
         similarity: {
           text1,
           text2,
           score: similarityScore,
         },
-        creativeResponse,
+        creativeResponse: {
+          modelGPT: creativeResponse,
+        },
       });
     } else {
       return NextResponse.json(
@@ -41,7 +43,6 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    // return NextResponse.json({ success: true, abstractsDanSaran });
   } catch (error) {
     console.error("Error processing files:", error);
     return NextResponse.json(
