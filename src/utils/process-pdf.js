@@ -27,7 +27,7 @@ export async function extractAbstractsFromFiles(files) {
 }
 
 function extractAbstract(text) {
-  const abstractStart = /abstrak/i;
+  const abstractStart = /abstrak|intisari/i;
   const abstractEnd = /kata kunci|introduction|background|chapter 1/i;
 
   const startMatch = text.match(abstractStart);

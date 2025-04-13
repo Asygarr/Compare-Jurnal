@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { extractAbstractsFromFiles } from "@/utils/processPDF";
-import { getSimilarityFromPython } from "@/utils/callBERT";
-import { generateCreativeResponse } from "@/utils/callGPT";
+import { extractAbstractsFromFiles } from "@/utils/process-pdf";
+import { getSimilarityFromPython } from "@/utils/call-ST";
+import { generateCreativeResponseGemini } from "@/utils/model-gemini";
+import { generateCreativeResponseLLM } from "@/utils/model-LLM";
 
 // test get path
 export async function GET() {
@@ -14,16 +15,26 @@ export async function POST(request) {
 
     const abstractsDanSaran = await extractAbstractsFromFiles(files);
 
-    if (abstractsDanSaran.length >= 2) {
+    if (abstractsDanSaran.length === 2) {
       const text1 = abstractsDanSaran[0].abstract;
       const text2 = abstractsDanSaran[1].abstract;
 
       const similarityScore = await getSimilarityFromPython(text1, text2);
-      const creativeResponse = await generateCreativeResponse(
+      // const creativeResponse1 = await generateCreativeResponseLLM(
+      //   text1,
+      //   text2,
+      //   similarityScore
+      // );
+      const creativeResponse2 = await generateCreativeResponseGemini(
         text1,
         text2,
         similarityScore
       );
+
+      // const creativeResponse =
+      //   creativeResponse1 || creativeResponse2 || "No response generated.";
+
+      const creativeResponse = creativeResponse2;
 
       return NextResponse.json({
         success: true,

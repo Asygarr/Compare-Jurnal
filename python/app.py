@@ -27,7 +27,16 @@ async def calculate_similarity(data: TextPair):
     embedding2 = model.encode(text2, convert_to_tensor=True, normalize_embeddings=True)
 
     similarity = util.pytorch_cos_sim(embedding1, embedding2).item()
-    return {"similarity_score": similarity}
+    
+    labelKemiripan = "tidak mirip"
+    if similarity > 0.7:
+        labelKemiripan = "sangat mirip"
+    elif similarity > 0.5:
+        labelKemiripan = "mirip"
+    elif similarity > 0.3:
+        labelKemiripan = "tidak mirip"
+
+    return {"similarity_score": similarity, "label_kemiripan": labelKemiripan}
 
 
 

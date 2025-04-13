@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { formatMarkdownResponse } from "@/utils/markedTeks";
+// import { formatMarkdownResponse } from "@/utils/marked-teks";
 import Navbar from "../components/Navbar";
 
 const FilePreview = () => {
   const [files, setFiles] = useState([]);
-  const [comparisonResult, setComparisonResult] = useState(null); // Untuk menyimpan hasil
+  const [comparisonResult, setComparisonResult] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const storedFiles = localStorage.getItem("selectedFiles");
@@ -16,6 +17,9 @@ const FilePreview = () => {
   }, []);
 
   const handleCompare = async () => {
+    setIsLoading(true);
+    setComparisonResult(null);
+
     try {
       const response = await fetch("/api/compare", {
         method: "POST",
@@ -32,6 +36,8 @@ const FilePreview = () => {
     } catch (error) {
       console.error("Error comparing files:", error.message);
       setComparisonResult(["Error processing comparison."]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -66,20 +72,22 @@ const FilePreview = () => {
           Compare
         </button>
 
+        {/* Tampilkan hasil atau indikator loading */}
+        {isLoading && (
+          <div className="mt-8 text-gray-700">Processing comparison...</div>
+        )}
+
         {/* Tampilkan hasil di sini */}
-        {comparisonResult && (
+        {comparisonResult && !isLoading && (
           <div className="mt-8 w-full max-w-4xl bg-white p-6 shadow rounded">
             <h3 className="font-semibold text-lg text-red-600 mb-4">
               Comparison Results
             </h3>
             <div className="space-y-4">
               <div className="p-4 bg-gray-100 border rounded text-gray-700">
-                <div
-                  className="whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={formatMarkdownResponse(
-                    comparisonResult.creativeResponse.modelGPT
-                  )}
-                />
+                <div className="whitespace-pre-wrap">
+                  {comparisonResult.creativeResponse.modelGPT}
+                </div>
               </div>
             </div>
           </div>
