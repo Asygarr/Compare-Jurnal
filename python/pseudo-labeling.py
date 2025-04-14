@@ -4,7 +4,7 @@ from tqdm.auto import tqdm
 
 model = SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
 
-df = pd.read_csv("./dataset/dataset-jurnal-test.csv", encoding="latin-1")
+df = pd.read_csv("./dataset/dataset-jurnal-dummy.csv", encoding="latin-1")
 
 print(df.head())
 
@@ -24,5 +24,5 @@ for a, b in tqdm(zip(df["abstract1"], df["abstract2"]), total=len(df)):
 
 df["cosine_similarity"] = pseudo_scores
 
-df.to_csv("dataset/data_abstrak_with_pseudo_labels.csv", index=False)
+df.to_csv("dataset/silver-label.csv", index=False)
 print("Selesai! Data dengan pseudo-label tersimpan di data_abstrak_with_pseudo_labels.csv")

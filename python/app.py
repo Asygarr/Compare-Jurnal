@@ -5,7 +5,7 @@ import re
 
 app = FastAPI()
 # model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer("./fine_tuned_model")
 
 class TextPair(BaseModel):
     text1: str
@@ -29,11 +29,11 @@ async def calculate_similarity(data: TextPair):
     similarity = util.pytorch_cos_sim(embedding1, embedding2).item()
     
     labelKemiripan = "tidak mirip"
-    if similarity > 0.7:
+    if similarity >= 0.7:
         labelKemiripan = "sangat mirip"
-    elif similarity > 0.5:
+    elif similarity >= 0.4:
         labelKemiripan = "mirip"
-    elif similarity > 0.3:
+    elif similarity < 0.4:
         labelKemiripan = "tidak mirip"
 
     return {"similarity_score": similarity, "label_kemiripan": labelKemiripan}
