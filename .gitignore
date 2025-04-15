@@ -13,6 +13,12 @@
 # testing
 /coverage
 
+# fine tuning model
+/python/fine_tuned_model/
+
+# pycache
+/python/__pycache__/
+
 # next.js
 /.next/
 /out/
