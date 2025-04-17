@@ -7,8 +7,7 @@ SEMANTIC_SCHOLAR_URL = "https://api.semanticscholar.org/graph/v1/paper/search"
 FIELDS = "paperId,title,abstract"
 
 TOPIC_LIST = [
-    "Teknologi", "Kesehatan", "Ekonomi", "Pendidikan", 
-    "Seni", "Budaya", "Olahraga", "Politik", "Hukum", "Pertanian"
+    "Teknologi", "Kesehatan", "Ekonomi"
 ]
 
 def get_jurnal(min_abstract=200):

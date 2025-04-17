@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 from scipy.stats import pearsonr, spearmanr
 from sentence_transformers import SentenceTransformer, util
 
-df_gold = pd.read_csv("./dataset/gold-label.csv", encoding="latin-1")
+df_gold = pd.read_csv("../dataset/gold-label.csv", encoding="latin-1")
 
 model_awal = SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
-model_ft   = SentenceTransformer("./fine_tuned_model")
+model_ft   = SentenceTransformer("../fine_tuned_model")
 
 texts1 = df_gold["abstract1"].tolist()
 texts2 = df_gold["abstract2"].tolist()

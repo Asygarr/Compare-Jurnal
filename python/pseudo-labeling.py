@@ -25,4 +25,4 @@ for a, b in tqdm(zip(df["abstract1"], df["abstract2"]), total=len(df)):
 df["cosine_similarity"] = pseudo_scores
 
 df.to_csv("dataset/silver-label.csv", index=False)
-print("Selesai! Data dengan pseudo-label tersimpan di data_abstrak_with_pseudo_labels.csv")
+print("Selesai! Data dengan pseudo-label tersimpan di silver-label.csv")

@@ -2,7 +2,7 @@ from sentence_transformers import SentenceTransformer, losses, InputExample, eva
 from torch.utils.data import DataLoader
 import pandas as pd
 
-df = pd.read_csv("./dataset/silver-label-calibrated.csv", encoding="latin-1")
+df = pd.read_csv("../dataset/silver-label-calibrated.csv", encoding="latin-1")
 
 examples = [
     InputExample(texts=[row["abstract1"], row["abstract2"]],
@@ -10,7 +10,7 @@ examples = [
     for _, row in df.iterrows()
 ]
 
-gold = pd.read_csv("./dataset/gold-label.csv", encoding="latin-1")
+gold = pd.read_csv("../dataset/gold-label.csv", encoding="latin-1")
 gold_examples = [
     InputExample(texts=[row["abstract1"], row["abstract2"]],
                  label=row["cosine_similarity"])

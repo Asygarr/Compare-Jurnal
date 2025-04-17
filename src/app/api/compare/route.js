@@ -19,16 +19,23 @@ export async function POST(request) {
       const text1 = abstractsDanSaran[0].abstract;
       const text2 = abstractsDanSaran[1].abstract;
 
-      const similarityScore = await getSimilarityFromPython(text1, text2);
+      const getSentenceTransformers = await getSimilarityFromPython(
+        text1,
+        text2
+      );
+      const similarityPercentage = (
+        getSentenceTransformers.similarity_score * 100
+      ).toFixed(2);
+
       // const creativeResponse1 = await generateCreativeResponseLLM(
       //   text1,
       //   text2,
-      //   similarityScore
+      //   getSentenceTransformers
       // );
       const creativeResponse2 = await generateCreativeResponseGemini(
         text1,
         text2,
-        similarityScore
+        getSentenceTransformers.similarity_score
       );
 
       // const creativeResponse =
@@ -42,7 +49,8 @@ export async function POST(request) {
         similarity: {
           text1,
           text2,
-          score: similarityScore,
+          score: similarityPercentage,
+          label_kemiripan: getSentenceTransformers.label_kemiripan,
         },
         creativeResponse: {
           modelGPT: creativeResponse,

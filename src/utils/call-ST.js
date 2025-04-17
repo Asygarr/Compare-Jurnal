@@ -13,7 +13,7 @@ export async function getSimilarityFromPython(text1, text2) {
     }
 
     const data = await response.json();
-    return data.similarity_score;
+    return data;
   } catch (error) {
     console.error("Error calling Python backend:", error);
     throw error;

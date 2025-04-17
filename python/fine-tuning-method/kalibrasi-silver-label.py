@@ -2,8 +2,8 @@ from sklearn.isotonic import IsotonicRegression
 import pandas as pd
 import matplotlib.pyplot as plt
 
-silver = pd.read_csv("./dataset/silver-label.csv", encoding="latin-1")
-gold   = pd.read_csv("./dataset/gold-label.csv",   encoding="latin-1")
+silver = pd.read_csv("../dataset/silver-label.csv", encoding="latin-1")
+gold   = pd.read_csv("../dataset/gold-label.csv",   encoding="latin-1")
 
 silver["key"] = silver["title1"].str.strip() + "||" + silver["title2"].str.strip()
 gold["key"]   = gold["title1"].str.strip()   + "||" + gold["title2"].str.strip()

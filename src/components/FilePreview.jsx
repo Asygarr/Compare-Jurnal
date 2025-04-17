@@ -83,6 +83,10 @@ const FilePreview = () => {
             <h3 className="font-semibold text-lg text-red-600 mb-4">
               Comparison Results
             </h3>
+            <p className=" text-black">
+              <strong>Similarity Score:</strong>{" "}
+              {comparisonResult.similarity.score}%
+            </p>
             <div className="space-y-4">
               <div className="p-4 bg-gray-100 border rounded text-gray-700">
                 <div className="whitespace-pre-wrap">
