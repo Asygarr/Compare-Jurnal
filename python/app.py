@@ -6,25 +6,16 @@ import re
 import numpy as np
 
 app = FastAPI()
-
-# model = SentenceTransformer("./fine_tuned_model")
-
 model = SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
-kmeans = joblib.load('./kmeans_model.joblib')
 
-cluster_labels = {0: "Rendah", 1: "Sedang", 2: "Tinggi"} 
-
-cluster_centers = kmeans.cluster_centers_.squeeze()
-sorted_indices = np.argsort(cluster_centers)
-sorted_labels = ['Rendah', 'Sedang', 'Tinggi']
-cluster_labels = {idx: label for idx, label in zip(sorted_indices, sorted_labels)}
+kmeans = joblib.load("./kmeans_model.joblib")
+cluster_label_mapping = {0: "Rendah", 1: "Sedang", 2: "Tinggi"} 
 
 class TextPair(BaseModel):
     text1: str
     text2: str
 
 def preprocess_text(text: str) -> str:
-    text = re.sub(r"[^\w\s]", "", text)  # Menghapus special characters, seperti !, ?, dll
     text = re.sub(r"\n", " ", text)      # Menghapus newline
     text = re.sub(r"\s+", " ", text)     # Menghapus multiple spaces
     text = text.lower().strip()          # Mengubah teks menjadi lowercase dan menghapus leading/trailing spaces
@@ -37,10 +28,14 @@ async def calculate_similarity(data: TextPair):
 
     embedding1 = model.encode(text1, convert_to_tensor=True, normalize_embeddings=True)
     embedding2 = model.encode(text2, convert_to_tensor=True, normalize_embeddings=True)
-
     similarity = util.pytorch_cos_sim(embedding1, embedding2).item()
-    
-    predicted_cluster = kmeans.predict([[similarity]])[0]
-    similarity_level = cluster_labels[predicted_cluster]
 
-    return {"similarity_score": similarity, "label_kemiripan": similarity_level}
+    similarity_array = np.array([[similarity]])
+    predicted_cluster = kmeans.predict(similarity_array)[0]
+    label_kemiripan = cluster_label_mapping[predicted_cluster]
+
+    return {
+        "similarity_score": similarity,
+        "cluster": int(predicted_cluster),
+        "label_kemiripan": label_kemiripan
+    }
