@@ -14,12 +14,12 @@ export async function extractAbstractsFromFiles(files) {
     const formattedFileName = fileName.replace(/_/g, " ");
 
     const abstractText = extractAbstract(pdfData.text);
-    const kesimpulanSaranText = extractKesimpulan(pdfData.text);
+    // const kesimpulanSaranText = extractKesimpulan(pdfData.text);
 
     abstractsDanKesimpulanSaran.push({
       file: formattedFileName,
       abstract: abstractText,
-      kesimpulanDanSaran: kesimpulanSaranText,
+      // kesimpulanDanSaran: kesimpulanSaranText,
     });
   }
 
@@ -27,8 +27,9 @@ export async function extractAbstractsFromFiles(files) {
 }
 
 function extractAbstract(text) {
-  const abstractStart = /abstrak|intisari/i;
-  const abstractEnd = /kata kunci|introduction|background|chapter 1/i;
+  const abstractStart = /abstract|abstrak|intisari/i;
+  const abstractEnd =
+    /keywords|keyword|kata kunci|introduction|background|chapter 1/i;
 
   const startMatch = text.match(abstractStart);
   const endMatch = text.match(abstractEnd);
@@ -38,7 +39,7 @@ function extractAbstract(text) {
     const endIndex = endMatch ? endMatch.index : text.length;
     return text.slice(startIndex, endIndex).trim();
   }
-  return "Abstract not found.";
+  return null;
 }
 
 function extractKesimpulan(text) {
