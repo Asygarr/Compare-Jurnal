@@ -7,6 +7,13 @@ export async function POST(req) {
     const data = await req.formData();
     const files = data.getAll("files");
 
+    if (files.length > 2) {
+      return NextResponse.json(
+        { error: "Only up to 2 files are allowed." },
+        { status: 400 }
+      );
+    }
+
     const uploadDir = path.join(process.cwd(), "public/uploads");
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
