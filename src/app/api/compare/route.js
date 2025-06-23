@@ -19,13 +19,25 @@ export async function POST(request) {
       const text1 = abstractsDanSaran[0].abstract;
       const text2 = abstractsDanSaran[1].abstract;
 
+      console.log(text2);
+
+      if (text1 === null || text2 === null) {
+        return NextResponse.json(
+          {
+            error:
+              "Abstract not found. This may be due to the journal template not being supported yet.",
+          },
+          { status: 400 }
+        );
+      }
+
       const getSentenceTransformers = await getSimilarityFromPython(
         text1,
         text2
       );
-      const similarityPercentage = (
-        getSentenceTransformers.similarity_score * 100
-      ).toFixed(2);
+      const roundedSimilarityScore =
+        Math.floor(getSentenceTransformers.similarity_score * 100) / 100;
+      const percentSimilarityScore = roundedSimilarityScore * 100;
 
       // const creativeResponse1 = await generateCreativeResponseLLM(
       //   text1,
@@ -49,11 +61,11 @@ export async function POST(request) {
         similarity: {
           text1,
           text2,
-          score: similarityPercentage,
+          score: percentSimilarityScore,
           label_kemiripan: getSentenceTransformers.label_kemiripan,
         },
         creativeResponse: {
-          modelGPT: creativeResponse,
+          modelGenAI: creativeResponse,
         },
       });
     } else {
