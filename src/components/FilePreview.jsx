@@ -1,21 +1,64 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-// import { formatMarkdownResponse } from "@/utils/marked-teks";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
+import ResultBox from "@/utils/marked-teks";
 
 const FilePreview = () => {
   const [files, setFiles] = useState([]);
   const [comparisonResult, setComparisonResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("");
 
+  // Load existing uploaded files on mount
   useEffect(() => {
-    const storedFiles = localStorage.getItem("selectedFiles");
-    if (storedFiles) {
-      setFiles(JSON.parse(storedFiles));
-    }
+    const storedFiles = JSON.parse(localStorage.getItem("selectedFiles")) || [];
+    setFiles(storedFiles);
   }, []);
 
+  // Show popup message
+  const showPopup = (message, type = "info") => {
+    setPopupMessage(message);
+    setPopupType(type);
+    setTimeout(() => {
+      setPopupMessage("");
+    }, 2000);
+  };
+
+  // Upload handler
+  const handleFileUpload = async (e) => {
+    const newFiles = e.target.files;
+    if (files.length + newFiles.length > 2) {
+      showPopup("You can only upload 2 files for comparison.", "error");
+      return;
+    }
+
+    const formData = new FormData();
+    Array.from(newFiles).forEach((file) => formData.append("files", file));
+
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      const updatedFiles = [...files, ...result.files];
+      localStorage.setItem("selectedFiles", JSON.stringify(updatedFiles));
+      setFiles(updatedFiles);
+      showPopup(
+        `${result.files.length} file(s) uploaded successfully.`,
+        "success"
+      );
+    } else {
+      showPopup(result.error || "Upload failed.", "error");
+    }
+
+    e.target.value = null;
+  };
+
+  // Compare handler
   const handleCompare = async () => {
     setIsLoading(true);
     setComparisonResult(null);
@@ -27,31 +70,63 @@ const FilePreview = () => {
         body: JSON.stringify({ files: files.map((file) => file.path) }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
       const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Comparison failed.");
       setComparisonResult(result);
+      showPopup("Comparison complete!", "success");
     } catch (error) {
-      console.error("Error comparing files:", error.message);
-      setComparisonResult(["Error processing comparison."]);
+      // console.error("Compare Error:", error);
+      showPopup(error.message || "Comparison failed.", "error");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Reset handler (hapus localStorage & file uploads di server)
+  const handleResetUpload = async () => {
+    await fetch("/api/delete-uploads", { method: "POST" });
+    localStorage.removeItem("selectedFiles");
+    setFiles([]);
+    setComparisonResult(null);
+    showPopup("Uploads reset successfully.", "success");
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <Navbar />
       <main className="flex flex-col items-center justify-center w-full overflow-y-auto min-h-screen pt-24 pb-10">
-        <h2 className="text-3xl font-semibold mb-4 text-red-600">
-          File Preview
-        </h2>
+        <h2 className="text-3xl font-bold mb-4 text-red-600">File Preview</h2>
         <p className="text-gray-600 mb-8 text-center">
-          Preview the content of your uploaded journal files.
+          Upload up to 2 journal files for comparison.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+
+        {/* Upload / Compare Button */}
+        {files.length < 2 ? (
+          <label className="bg-red-500 hover:bg-red-600 text-white py-2 px-6 rounded cursor-pointer">
+            Upload File
+            <input type="file" onChange={handleFileUpload} className="hidden" />
+          </label>
+        ) : (
+          <button
+            onClick={handleCompare}
+            className="bg-red-600 text-white py-2 px-6 rounded hover:bg-red-700"
+          >
+            {isLoading ? "Comparing..." : "Compare"}
+          </button>
+        )}
+
+        {/* Reset Button */}
+        {files.length > 0 && (
+          <button
+            onClick={handleResetUpload}
+            className="mt-4 bg-gray-400 hover:bg-gray-500 text-white py-2 px-6 rounded"
+          >
+            Reset Upload
+          </button>
+        )}
+
+        {/* Uploaded File Preview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mt-10">
           {files.map((file, index) => (
             <div key={index} className="bg-white p-4 shadow rounded">
               <h3 className="font-semibold text-lg mb-2 text-red-600">
@@ -65,38 +140,59 @@ const FilePreview = () => {
             </div>
           ))}
         </div>
-        <button
-          onClick={handleCompare}
-          className="mt-8 bg-red-600 text-white py-2 px-6 rounded hover:bg-red-700"
-        >
-          Compare
-        </button>
 
-        {/* Tampilkan hasil atau indikator loading */}
-        {isLoading && (
-          <div className="mt-8 text-gray-700">Processing comparison...</div>
-        )}
-
-        {/* Tampilkan hasil di sini */}
+        {/* Comparison Result */}
         {comparisonResult && !isLoading && (
-          <div className="mt-8 w-full max-w-4xl bg-white p-6 shadow rounded">
+          <div className="mt-10 w-full max-w-4xl bg-white p-6 shadow rounded">
             <h3 className="font-semibold text-lg text-red-600 mb-4">
               Comparison Results
             </h3>
-            <p className=" text-black">
+            <p className="text-black">
               <strong>Similarity Score:</strong>{" "}
               {comparisonResult.similarity.score}%
             </p>
-            <div className="space-y-4">
-              <div className="p-4 bg-gray-100 border rounded text-gray-700">
-                <div className="whitespace-pre-wrap">
-                  {comparisonResult.creativeResponse.modelGPT}
-                </div>
-              </div>
-            </div>
+            <p className="text-black">
+              <strong>Similarity Label:</strong>{" "}
+              {comparisonResult.similarity.label_kemiripan}
+            </p>
+            <ResultBox
+              resultText={comparisonResult.creativeResponse.modelGenAI}
+            />
           </div>
         )}
       </main>
+
+      {/* Pop Up Message */}
+      {popupMessage && (
+        <div
+          className={`fixed top-5 right-5 px-4 py-2 rounded shadow-lg z-50 text-white animate-fade-in ${
+            popupType === "success"
+              ? "bg-green-500"
+              : popupType === "error"
+              ? "bg-red-500"
+              : "bg-blue-500"
+          }`}
+        >
+          {popupMessage}
+        </div>
+      )}
+
+      {/* Animasi CSS */}
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 };
