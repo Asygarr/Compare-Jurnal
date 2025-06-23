@@ -1,34 +1,42 @@
 import pandas as pd
+import numpy as np
 from sklearn.cluster import KMeans
+import seaborn as sns
 import matplotlib.pyplot as plt
 import joblib
+import json
 
-df = pd.read_csv('./dataset/silver-label.csv', encoding='latin-1')
+df = pd.read_csv('./dataset/journal-pseudo-label.csv', encoding='latin-1')
+X  = df[['pseudo-label']].values
 
-X = df[['cosine_similarity']].values
+kmeans = KMeans(n_clusters=6, random_state=42).fit(X)
+df['cluster'] = kmeans.labels_
 
-kmeans = KMeans(n_clusters=3, random_state=42)
-df['cluster'] = kmeans.fit_predict(X)
-joblib.dump(kmeans, './kmeans_model.joblib')
+# Urutkan centroid untuk mapping
+centers      = kmeans.cluster_centers_.flatten()
+sorted_idx   = np.argsort(centers)
+labels       = ['Hampir Tidak Relevan','Kurang Relevan','Sedikit Berkaitan', 'Cukup Berkaitan', 'Sangat Berkaitan', 'Hampir Mirip Sempurna'][:len(sorted_idx)] 
+cluster_map = {
+    int(sorted_idx[i]): labels[i]
+    for i in range(len(labels))
+}
 
-cluster_avg = df.groupby('cluster')['cosine_similarity'].mean()
-sorted_clusters = cluster_avg.sort_values().index.tolist()
+# Terapkan label
+df['similarity_level'] = df['cluster'].map(cluster_map)
+df.to_csv('./dataset/journal-clustered.csv', index=False)
 
-labels = ['Rendah', 'Sedang', 'Tinggi']
-cluster_labels = dict(zip(sorted_clusters, labels))
+# Persist model, dan mapping
+joblib.dump(kmeans, './model/kmeans_model.joblib')
+with open('./model/cluster_label_mapping.json','w') as f:
+    json.dump(cluster_map, f, indent=2)
 
-df['similarity_level'] = df['cluster'].map(cluster_labels)
-df.to_csv('./dataset/silver-label-clustered.csv', index=False)
-print("Clustering selesai. Hasil disimpan di silver-label-clustered.csv")
+print("Selesai: model, dan mapping disimpan.")
 
-plt.figure(figsize=(8, 5))
-for label in ['Rendah', 'Sedang', 'Tinggi']:
-    plt.hist(df[df['similarity_level'] == label]['cosine_similarity'], bins=10, alpha=0.6, label=label)
-plt.title('Distribusi Similarity per Cluster')
-plt.xlabel('Cosine Similarity')
-plt.ylabel('Jumlah Data')
-plt.legend()
-plt.grid(True)
+plt.figure(figsize=(10,6))
+sns.violinplot(x='similarity_level', y='pseudo-label', data=df, inner='quartile')
+plt.title('Violin Plot Pseudo‑label per Level')
+plt.xlabel('Similarity Level')
+plt.ylabel('Pseudo‑label')
 plt.tight_layout()
-# plt.savefig("./images/cluster_visualization.png")
+plt.savefig('./images/violin_plot_similarity_level.png')
 plt.show()
