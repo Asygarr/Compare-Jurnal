@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { extractAbstractsFromFiles } from "@/utils/process-pdf";
 import { getSimilarityFromPython } from "@/utils/call-ST";
 import { generateCreativeResponseGemini } from "@/utils/model-gemini";
-import { generateCreativeResponseLLM } from "@/utils/model-LLM";
+// import { generateCreativeResponseLLM } from "@/utils/model-LLM";
 
 // test get path
 export async function GET() {
@@ -47,13 +47,18 @@ export async function POST(request) {
       const creativeResponse2 = await generateCreativeResponseGemini(
         text1,
         text2,
-        getSentenceTransformers.similarity_score
+        getSentenceTransformers.similarity_score,
+        getSentenceTransformers.label_kemiripan
       );
 
       // const creativeResponse =
       //   creativeResponse1 || creativeResponse2 || "No response generated.";
 
       const creativeResponse = creativeResponse2;
+
+      // Debug logging
+      console.log("Creative response from Gemini:", creativeResponse);
+      console.log("Type of creative response:", typeof creativeResponse);
 
       return NextResponse.json({
         success: true,

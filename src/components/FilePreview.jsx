@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
-import ResultBox from "@/utils/marked-teks";
+import BilingualResultBox from "@/components/BilingualResultBox";
 
 const FilePreview = () => {
   const [files, setFiles] = useState([]);
@@ -155,8 +155,8 @@ const FilePreview = () => {
               <strong>Similarity Label:</strong>{" "}
               {comparisonResult.similarity.label_kemiripan}
             </p>
-            <ResultBox
-              resultText={comparisonResult.creativeResponse.modelGenAI}
+            <BilingualResultBox
+              resultData={comparisonResult.creativeResponse.modelGenAI}
             />
           </div>
         )}
