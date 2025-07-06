@@ -19,8 +19,6 @@ export async function POST(request) {
       const text1 = abstractsDanSaran[0].abstract;
       const text2 = abstractsDanSaran[1].abstract;
 
-      console.log(text2);
-
       if (text1 === null || text2 === null) {
         return NextResponse.json(
           {
@@ -35,9 +33,9 @@ export async function POST(request) {
         text1,
         text2
       );
-      const roundedSimilarityScore =
-        Math.floor(getSentenceTransformers.similarity_score * 100) / 100;
-      const percentSimilarityScore = roundedSimilarityScore * 100;
+      const roundedSimilarityScore = Math.round(
+        getSentenceTransformers.similarity_score * 100
+      );
 
       // const creativeResponse1 = await generateCreativeResponseLLM(
       //   text1,
@@ -48,7 +46,7 @@ export async function POST(request) {
         text1,
         text2,
         getSentenceTransformers.similarity_score,
-        getSentenceTransformers.label_kemiripan
+        getSentenceTransformers.label_english
       );
 
       // const creativeResponse =
@@ -56,18 +54,16 @@ export async function POST(request) {
 
       const creativeResponse = creativeResponse2;
 
-      // Debug logging
-      console.log("Creative response from Gemini:", creativeResponse);
-      console.log("Type of creative response:", typeof creativeResponse);
-
       return NextResponse.json({
         success: true,
         // abstractsDanSaran,
         similarity: {
           text1,
           text2,
-          score: percentSimilarityScore,
+          score: roundedSimilarityScore,
           label_kemiripan: getSentenceTransformers.label_kemiripan,
+          label_english: getSentenceTransformers.label_english,
+          bilingual_labels: getSentenceTransformers.bilingual_labels,
         },
         creativeResponse: {
           modelGenAI: creativeResponse,
