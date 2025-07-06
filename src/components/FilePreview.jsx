@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import BilingualResultBox from "@/components/BilingualResultBox";
+import BilingualSimilarityBox from "@/components/BilingualSimilarityBox";
+import LanguageToggle from "@/components/LanguageToggle";
 
 const FilePreview = () => {
   const [files, setFiles] = useState([]);
@@ -144,17 +146,20 @@ const FilePreview = () => {
         {/* Comparison Result */}
         {comparisonResult && !isLoading && (
           <div className="mt-10 w-full max-w-4xl bg-white p-6 shadow rounded">
-            <h3 className="font-semibold text-lg text-red-600 mb-4">
-              Comparison Results
-            </h3>
-            <p className="text-black">
-              <strong>Similarity Score:</strong>{" "}
-              {comparisonResult.similarity.score}%
-            </p>
-            <p className="text-black">
-              <strong>Similarity Label:</strong>{" "}
-              {comparisonResult.similarity.label_kemiripan}
-            </p>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-semibold text-lg text-red-600">
+                Comparison Results
+              </h3>
+              {/* Language Toggle */}
+              <LanguageToggle />
+            </div>
+
+            {/* Bilingual Similarity Display */}
+            <BilingualSimilarityBox
+              similarityData={comparisonResult.similarity}
+            />
+
+            {/* Creative Response */}
             <BilingualResultBox
               resultData={comparisonResult.creativeResponse.modelGenAI}
             />

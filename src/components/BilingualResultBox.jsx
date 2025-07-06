@@ -5,7 +5,7 @@ import { marked } from "marked";
 
 export default function BilingualResultBox({ resultData }) {
   const [htmlContent, setHtmlContent] = useState("");
-  const [currentLanguage, setCurrentLanguage] = useState("indonesian");
+  const [currentLanguage, setCurrentLanguage] = useState("english");
   const [isClient, setIsClient] = useState(false);
 
   // Ensure we're on the client side before accessing localStorage
@@ -13,43 +13,64 @@ export default function BilingualResultBox({ resultData }) {
     setIsClient(true);
     if (typeof window !== "undefined") {
       const savedLanguage =
-        localStorage.getItem("preferredLanguage") || "indonesian";
+        localStorage.getItem("preferredLanguage") || "english";
       setCurrentLanguage(savedLanguage);
     }
   }, []);
 
-  // Debug logging
+  // Listen for language changes from other components
   useEffect(() => {
-    console.log("BilingualResultBox - resultData:", resultData);
-    console.log("BilingualResultBox - typeof resultData:", typeof resultData);
-    console.log("BilingualResultBox - currentLanguage:", currentLanguage);
-  }, [resultData, currentLanguage]);
+    const handleLanguageChange = (event) => {
+      setCurrentLanguage(event.detail.language);
+    };
+
+    if (isClient) {
+      window.addEventListener("languageChanged", handleLanguageChange);
+      return () => {
+        window.removeEventListener("languageChanged", handleLanguageChange);
+      };
+    }
+  }, [isClient]);
 
   // Update HTML content when language or data changes
   useEffect(() => {
-    if (resultData && resultData[currentLanguage]) {
-      console.log(
-        `Content for ${currentLanguage}:`,
-        resultData[currentLanguage]
-      );
-
+    if (
+      resultData &&
+      typeof resultData === "object" &&
+      resultData[currentLanguage]
+    ) {
       const html = marked.parse(resultData[currentLanguage]);
       setHtmlContent(html);
+    } else if (resultData) {
+      // Try to parse if it's a string containing JSON
+      try {
+        let parsedData = resultData;
+        if (typeof resultData === "string") {
+          // Check if it looks like JSON
+          if (
+            resultData.trim().startsWith("{") &&
+            resultData.trim().endsWith("}")
+          ) {
+            parsedData = JSON.parse(resultData);
+          }
+        }
+
+        if (
+          parsedData &&
+          typeof parsedData === "object" &&
+          parsedData[currentLanguage]
+        ) {
+          const html = marked.parse(parsedData[currentLanguage]);
+          setHtmlContent(html);
+        }
+      } catch (error) {
+        console.log("Failed to parse result data:", error);
+      }
     }
   }, [resultData, currentLanguage]);
 
-  // Handle language toggle
-  const toggleLanguage = (language) => {
-    setCurrentLanguage(language);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("preferredLanguage", language);
-    }
-  };
-
   // Handle case where resultData is a string (backward compatibility)
   if (typeof resultData === "string") {
-    console.log("Displaying string data as fallback");
-
     // Try to parse if it looks like JSON
     try {
       const parsedData = JSON.parse(resultData);
@@ -78,7 +99,6 @@ export default function BilingualResultBox({ resultData }) {
     !resultData.indonesian &&
     !resultData.english
   ) {
-    console.log("Raw result data:", resultData);
     return (
       <div className="mt-4 space-y-4">
         <div className="p-4 bg-yellow-100 border border-yellow-400 rounded text-yellow-700">
@@ -113,32 +133,6 @@ export default function BilingualResultBox({ resultData }) {
 
   return (
     <div className="mt-4 space-y-4">
-      {/* Language Toggle Buttons */}
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => toggleLanguage("indonesian")}
-          className={`px-4 py-2 rounded font-medium transition-colors ${
-            currentLanguage === "indonesian"
-              ? "bg-red-600 text-white"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-          }`}
-          disabled={!resultData.indonesian}
-        >
-          🇮🇩 Bahasa Indonesia
-        </button>
-        <button
-          onClick={() => toggleLanguage("english")}
-          className={`px-4 py-2 rounded font-medium transition-colors ${
-            currentLanguage === "english"
-              ? "bg-red-600 text-white"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-          }`}
-          disabled={!resultData.english}
-        >
-          🇺🇸 English
-        </button>
-      </div>
-
       {/* Content Display */}
       <div className="p-6 bg-white border rounded-lg shadow-sm text-gray-800 prose prose-lg max-w-none">
         {htmlContent ? (
