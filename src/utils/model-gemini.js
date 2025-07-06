@@ -17,14 +17,14 @@ export async function generateCreativeResponseGemini(
       I will provide two journal abstracts along with a similarity score calculated using a sentence-transformers model. Here's how to interpret the similarity score:
       Information: 
       - Similarity Label: ${labelKemiripan}
-      - Similarity Score: ${similarityScore.toFixed(2)}
+      - Similarity Score: ${similarityScore}
       - Abstract 1: ${text1}
       - Abstract 2: ${text2}
 
       Based on this information, analyze both journals and provide ONLY a valid JSON response with this exact structure:
       {
-        "indonesian": "# Ringkasan Perbandingan Jurnal\\n\\n## 1. Ringkasan Jurnal Pertama\\n• [summary points]\\n\\n## 2. Ringkasan Jurnal Kedua\\n• [summary points]\\n\\n## Kesamaan Utama:\\n- [similarity points]\\n\\n## Perbedaan Utama:\\n- [difference points]\\n\\n## Analisis Hubungan\\n[detailed analysis paragraphs]\\n\\n## Kesimpulan\\n[conclusion paragraph]",
-        "english": "# Journal Comparison Summary\\n\\n## 1. First Journal Summary\\n• [summary points]\\n\\n## 2. Second Journal Summary\\n• [summary points]\\n\\n## Main Similarities:\\n- [similarity points]\\n\\n## Main Differences:\\n- [difference points]\\n\\n## Relationship Analysis\\n[detailed analysis paragraphs]\\n\\n## Conclusion\\n[conclusion paragraph]"
+        "indonesian": "# Ringkasan Perbandingan Jurnal\\n\\n## 1. Ringkasan Jurnal Pertama\\n[detailed paragraph summary of first journal]\\n\\n## 2. Ringkasan Jurnal Kedua\\n[detailed paragraph summary of second journal]\\n\\n## Kesamaan Utama:\\n- [similarity points]\\n\\n## Perbedaan Utama:\\n- [difference points]\\n\\n## Analisis Hubungan\\n[detailed analysis paragraphs]\\n\\n## Kesimpulan\\n[conclusion paragraph]",
+        "english": "# Journal Comparison Summary\\n\\n## 1. First Journal Summary\\n[detailed paragraph summary of first journal]\\n\\n## 2. Second Journal Summary\\n[detailed paragraph summary of second journal]\\n\\n## Main Similarities:\\n- [similarity points]\\n\\n## Main Differences:\\n- [difference points]\\n\\n## Relationship Analysis\\n[detailed analysis paragraphs]\\n\\n## Conclusion\\n[conclusion paragraph]"
       }
 
       CRITICAL REQUIREMENTS:
