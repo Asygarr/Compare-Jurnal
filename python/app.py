@@ -12,6 +12,15 @@ with open("./model/cluster_label_mapping.json", "r") as f:
     raw_map = json.load(f)
 cluster_label_mapping = {int(k): v for k, v in raw_map.items()}
 
+bilingual_labels = {
+    "Hampir Tidak Relevan": "Almost Irrelevant",
+    "Kurang Relevan": "Less Relevant",
+    "Sedikit Berkaitan": "Slightly Related",
+    "Cukup Berkaitan": "Moderately Related",
+    "Sangat Berkaitan": "Highly Related",
+    "Hampir Mirip Sempurna": "Nearly Perfect Match"
+}
+
 class TextPair(BaseModel):
     text1: str
     text2: str
@@ -32,6 +41,7 @@ async def calculate_similarity(data: TextPair):
 
     cluster_idx     = int(kmeans.predict([[sim]])[0])
     label_kemiripan = cluster_label_mapping[cluster_idx]
+    label_english = bilingual_labels.get(label_kemiripan, label_kemiripan)
     
     # debugging
     # print(f"[DEBUG] t1='{t1}', t2='{t2}', sim={sim}, cluster_idx={cluster_idx}, label_kemiripan={label_kemiripan}")
@@ -46,5 +56,16 @@ async def calculate_similarity(data: TextPair):
     return {
         "similarity_score": sim,
         "cluster": cluster_idx,
-        "label_kemiripan": label_kemiripan
+        "label_kemiripan": label_kemiripan,
+        "label_english": label_english,
+        "bilingual_labels": {
+            "indonesian": {
+                "scoreLabel": "Skor Kemiripan",
+                "similarity": label_kemiripan
+            },
+            "english": {
+                "scoreLabel": "Similarity Score", 
+                "similarity": label_english
+            }
+        }
     }
