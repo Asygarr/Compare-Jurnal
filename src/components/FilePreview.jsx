@@ -102,33 +102,43 @@ const FilePreview = () => {
           Upload up to 2 journal files for comparison.
         </p>
 
-        {/* Upload / Compare Button */}
-        {files.length < 2 ? (
-          <label className="bg-red-500 hover:bg-red-600 text-white py-2 px-6 rounded cursor-pointer">
-            Upload File
-            <input type="file" onChange={handleFileUpload} className="hidden" />
-          </label>
-        ) : (
-          <button
-            onClick={handleCompare}
-            className="bg-red-600 text-white py-2 px-6 rounded hover:bg-red-700"
-          >
-            {isLoading ? "Comparing..." : "Compare"}
-          </button>
-        )}
+        {/* Action Buttons Section */}
+        <div className="flex flex-col items-center space-y-4 mb-8">
+          {/* Upload / Compare Button */}
+          {files.length < 2 ? (
+            <label className="bg-red-500 hover:bg-red-600 text-white py-3 px-8 rounded-lg cursor-pointer transition-colors duration-200 font-medium">
+              Upload File
+              <input
+                type="file"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+            </label>
+          ) : (
+            <div className="flex flex-col items-center space-y-3">
+              <button
+                onClick={handleCompare}
+                className="bg-red-600 text-white py-3 px-8 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
+                disabled={isLoading}
+              >
+                {isLoading ? "Comparing..." : "Compare Journals"}
+              </button>
+            </div>
+          )}
 
-        {/* Reset Button */}
-        {files.length > 0 && (
-          <button
-            onClick={handleResetUpload}
-            className="mt-4 bg-gray-400 hover:bg-gray-500 text-white py-2 px-6 rounded"
-          >
-            Reset Upload
-          </button>
-        )}
+          {/* Reset Button */}
+          {files.length > 0 && (
+            <button
+              onClick={handleResetUpload}
+              className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg transition-colors duration-200 text-sm"
+            >
+              Reset Upload
+            </button>
+          )}
+        </div>
 
         {/* Uploaded File Preview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
           {files.map((file, index) => (
             <div key={index} className="bg-white p-4 shadow rounded">
               <h3 className="font-semibold text-lg mb-2 text-red-600">
@@ -166,6 +176,40 @@ const FilePreview = () => {
           </div>
         )}
       </main>
+
+      {/* Loading Modal Popup */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 animate-fade-in">
+            <div className="text-center">
+              {/* Spinning Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent"></div>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                Comparing Journals
+              </h3>
+
+              {/* Description */}
+              <p className="text-gray-600 mb-6">
+                Processing your journals and analyzing similarities...
+              </p>
+
+              {/* Progress Bar */}
+              <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+                <div className="bg-gradient-to-r from-red-500 to-red-600 h-3 rounded-full animate-pulse"></div>
+              </div>
+
+              {/* Footer Text */}
+              <p className="text-sm text-gray-500">
+                This may take a few moments
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pop Up Message */}
       {popupMessage && (
