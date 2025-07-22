@@ -50,3 +50,6 @@ next-env.d.ts
 
 # file agent.md
 /AGENT.md
+
+# tidak memasukkan apa yang ada di dalam folder /public/uploads
+/public/uploads/*
