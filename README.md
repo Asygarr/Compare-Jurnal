@@ -1,8 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Journal Comparison System
 
-## Getting Started
+This is a [Next.js](https://nextjs.org) project for academic journal comparison and analysis with AI-enhanced abstract extraction capabilities.
 
-First, run the development server:
+## Features
+
+- **Smart Abstract Extraction**: Uses regex patterns for fast extraction, with Google Gemini AI as a fallback for complex journal formats
+- **Journal Comparison**: Compare abstracts between different academic papers
+- **Similarity Analysis**: Analyze similarity scores between journal abstracts
+- **Multi-language Support**: Supports both Indonesian and English content
+
+## Setup
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Environment Configuration
+
+Copy the example environment file and add your API keys:
+
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local` and add your Google Gemini API key:
+
+```
+GEMINI_API_KEY=your_actual_api_key_here
+```
+
+To get a Gemini API key:
+
+1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Create a new API key
+3. Copy it to your `.env.local` file
+
+### 3. Run the Development Server
 
 ```bash
 npm run dev
@@ -16,9 +51,26 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## How Abstract Extraction Works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The system uses a two-tier approach for abstract extraction:
+
+1. **Primary Method**: Fast regex-based extraction for standard journal formats
+2. **Fallback Method**: Google Gemini AI extraction for non-standard or complex formats
+
+When regex extraction fails or returns insufficient text (< 100 characters), the system automatically:
+
+- Extracts the first 2000 words or 2 pages of the PDF
+- Sends this text to Gemini AI with a specialized prompt
+- Uses temperature 0.1 to minimize hallucination and ensure accuracy
+- Returns the exact abstract text without modifications
+
+## Project Structure
+
+- `src/utils/process-pdf.js` - Enhanced PDF processing with AI fallback
+- `src/utils/model-gemini.js` - Gemini AI integration
+- `public/uploads/` - Uploaded PDF files
+- `python/` - Python scripts for clustering and analysis
 
 ## Learn More
 
