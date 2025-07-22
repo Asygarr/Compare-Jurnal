@@ -30,31 +30,68 @@ const FilePreview = () => {
 
   // Upload handler
   const handleFileUpload = async (e) => {
-    const newFiles = e.target.files;
+    const newFiles = Array.from(e.target.files);
+
+    // Validate file count
     if (files.length + newFiles.length > 2) {
-      showPopup("You can only upload 2 files for comparison.", "error");
+      showPopup(
+        "You can only upload a maximum of 2 files for comparison.",
+        "error"
+      );
+      e.target.value = null;
+      return;
+    }
+
+    // Validate file types (PDF only)
+    const invalidFiles = newFiles.filter(
+      (file) =>
+        !file.type.includes("pdf") && !file.name.toLowerCase().endsWith(".pdf")
+    );
+    if (invalidFiles.length > 0) {
+      showPopup("Please select only PDF files.", "error");
+      e.target.value = null;
+      return;
+    }
+
+    // Check for duplicate files
+    const duplicateFiles = newFiles.filter((newFile) =>
+      files.some((existingFile) => existingFile.name === newFile.name)
+    );
+    if (duplicateFiles.length > 0) {
+      showPopup(
+        "Some files are already uploaded. Please select different files.",
+        "error"
+      );
+      e.target.value = null;
       return;
     }
 
     const formData = new FormData();
-    Array.from(newFiles).forEach((file) => formData.append("files", file));
+    newFiles.forEach((file) => formData.append("files", file));
 
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    const result = await response.json();
-    if (response.ok) {
-      const updatedFiles = [...files, ...result.files];
-      localStorage.setItem("selectedFiles", JSON.stringify(updatedFiles));
-      setFiles(updatedFiles);
-      showPopup(
-        `${result.files.length} file(s) uploaded successfully.`,
-        "success"
-      );
-    } else {
-      showPopup(result.error || "Upload failed.", "error");
+      const result = await response.json();
+      if (response.ok) {
+        const updatedFiles = [...files, ...result.files];
+        localStorage.setItem("selectedFiles", JSON.stringify(updatedFiles));
+        setFiles(updatedFiles);
+
+        const uploadCount = result.files.length;
+        const totalFiles = updatedFiles.length;
+        showPopup(
+          `${uploadCount} file(s) uploaded successfully. ${totalFiles} of 2 files ready for comparison.`,
+          "success"
+        );
+      } else {
+        showPopup(result.error || "Upload failed.", "error");
+      }
+    } catch (error) {
+      showPopup("Upload failed. Please try again.", "error");
     }
 
     e.target.value = null;
@@ -62,6 +99,11 @@ const FilePreview = () => {
 
   // Compare handler
   const handleCompare = async () => {
+    if (files.length < 2) {
+      showPopup("Please upload exactly 2 PDF files for comparison.", "error");
+      return;
+    }
+
     setIsLoading(true);
     setComparisonResult(null);
 
@@ -99,21 +141,33 @@ const FilePreview = () => {
       <main className="flex flex-col items-center justify-center w-full overflow-y-auto min-h-screen pt-24 pb-10">
         <h2 className="text-3xl font-bold mb-4 text-red-600">File Preview</h2>
         <p className="text-gray-600 mb-8 text-center">
-          Upload up to 2 journal files for comparison.
+          Select 1 or 2 PDF files for comparison. You can upload them all at
+          once or one by one.
         </p>
 
         {/* Action Buttons Section */}
         <div className="flex flex-col items-center space-y-4 mb-8">
           {/* Upload / Compare Button */}
           {files.length < 2 ? (
-            <label className="bg-red-500 hover:bg-red-600 text-white py-3 px-8 rounded-lg cursor-pointer transition-colors duration-200 font-medium">
-              Upload File
-              <input
-                type="file"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-            </label>
+            <div className="flex flex-col items-center space-y-2">
+              <label className="bg-red-500 hover:bg-red-600 text-white py-3 px-8 rounded-lg cursor-pointer transition-colors duration-200 font-medium">
+                {files.length === 0
+                  ? "Select PDF Files"
+                  : "Upload Another File"}
+                <input
+                  type="file"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  multiple
+                  accept=".pdf,application/pdf"
+                />
+              </label>
+              <p className="text-sm text-gray-500">
+                {files.length === 0
+                  ? "You can select 1 or 2 PDF files at once"
+                  : `${files.length} of 2 files uploaded`}
+              </p>
+            </div>
           ) : (
             <div className="flex flex-col items-center space-y-3">
               <button
@@ -123,6 +177,9 @@ const FilePreview = () => {
               >
                 {isLoading ? "Comparing..." : "Compare Journals"}
               </button>
+              <p className="text-sm text-green-600 font-medium">
+                ✓ 2 of 2 files ready for comparison
+              </p>
             </div>
           )}
 
