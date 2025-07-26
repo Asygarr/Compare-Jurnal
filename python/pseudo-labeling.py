@@ -3,7 +3,7 @@ from sentence_transformers import SentenceTransformer, util
 from tqdm.auto import tqdm
 # import numpy as np
 
-model = SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
+model = SentenceTransformer("all-mpnet-base-v2")
 
 df = pd.read_csv("./dataset/dataset-journal.csv", encoding="latin-1")
 
@@ -26,6 +26,7 @@ df["pseudo-label"] = pseudo_scores
 
 df.to_csv("dataset/journal-pseudo-label.csv", index=False)
 print("Selesai! Data dengan pseudo-label tersimpan")
+
 
 # model = SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
 

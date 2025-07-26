@@ -4,7 +4,7 @@ from sentence_transformers import SentenceTransformer, util
 import joblib, json, re, numpy as np
 
 app = FastAPI()
-model = SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
+model = SentenceTransformer("all-mpnet-base-v2")
 
 kmeans = joblib.load("./model/kmeans_model.joblib")
 
@@ -13,12 +13,10 @@ with open("./model/cluster_label_mapping.json", "r") as f:
 cluster_label_mapping = {int(k): v for k, v in raw_map.items()}
 
 bilingual_labels = {
-    "Hampir Tidak Relevan": "Almost Irrelevant",
-    "Kurang Relevan": "Less Relevant",
+    "Tidak Relevan": "Not Relevant",
     "Sedikit Berkaitan": "Slightly Related",
     "Cukup Berkaitan": "Moderately Related",
-    "Sangat Berkaitan": "Highly Related",
-    "Hampir Mirip Sempurna": "Nearly Perfect Match"
+    "Sangat Berkaitan": "Highly Related"
 }
 
 class TextPair(BaseModel):
@@ -28,7 +26,7 @@ class TextPair(BaseModel):
 def preprocess_text(text: str) -> str:
     text = re.sub(r"\n", " ", text)
     text = re.sub(r"\s+", " ", text)
-    return text.lower().strip()
+    return text.strip()
 
 @app.post("/similarity/")
 async def calculate_similarity(data: TextPair):
@@ -42,16 +40,6 @@ async def calculate_similarity(data: TextPair):
     cluster_idx     = int(kmeans.predict([[sim]])[0])
     label_kemiripan = cluster_label_mapping[cluster_idx]
     label_english = bilingual_labels.get(label_kemiripan, label_kemiripan)
-    
-    # debugging
-    # print(f"[DEBUG] t1='{t1}', t2='{t2}', sim={sim}, cluster_idx={cluster_idx}, label_kemiripan={label_kemiripan}")
-
-    # Debugging output 
-    # sim = 0.3910
-    # similarity_array = np.array([[sim]])
-    # cluster_idx = int(kmeans.predict(similarity_array)[0])
-    # label_kemiripan = cluster_label_mapping.get(cluster_idx, "Unknown")
-    # print(f"[DEBUG] sim={sim}, idx={cluster_idx}, label={label_kemiripan}")
 
     return {
         "similarity_score": sim,

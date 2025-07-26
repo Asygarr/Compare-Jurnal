@@ -3,4 +3,12 @@ uvicorn
 sentence-transformers
 torch
 transformers
+datasets
+scipy
+pandas
+numpy
+tqdm
+scikit-learn
+matplotlib
+seaborn
 

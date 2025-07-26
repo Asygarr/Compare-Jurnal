@@ -36,7 +36,7 @@ centers = final_kmeans.cluster_centers_.flatten()
 sorted_idx = np.argsort(centers)
 
 # Mapping ke label sesuai urutan centroid (rendah ke tinggi)
-labels = ['Hampir Tidak Relevan','Kurang Relevan','Sedikit Berkaitan', 'Cukup Berkaitan', 'Sangat Berkaitan', 'Hampir Mirip Sempurna'][:optimal_clusters]  # menyesuaikan jumlah cluster
+labels = ["Tidak Relevan", "Sedikit Berkaitan", "Cukup Berkaitan", "Sangat Berkaitan"]
 cluster_map = {
     int(sorted_idx[i]): labels[i]
     for i in range(len(labels))
