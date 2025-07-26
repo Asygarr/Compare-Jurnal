@@ -12,11 +12,11 @@ export async function POST(request) {
   try {
     const { files } = await request.json();
 
-    const abstractsDanSaran = await extractAbstractsFromFiles(files);
+    const extractAbstract = await extractAbstractsFromFiles(files);
 
-    if (abstractsDanSaran.length === 2) {
-      const text1 = abstractsDanSaran[0].abstract;
-      const text2 = abstractsDanSaran[1].abstract;
+    if (extractAbstract.length === 2) {
+      const text1 = extractAbstract[0].abstract;
+      const text2 = extractAbstract[1].abstract;
 
       if (text1 === null || text2 === null) {
         return NextResponse.json(
