@@ -24,97 +24,54 @@ function getInitialTextForAI(fullText) {
 
 // Gemini AI abstract extraction function
 async function extractAbstractWithAI(text) {
-  const system = `You are a precise text extractor specialized in academic papers. Your ONLY task is to extract the abstract content paragraph.
+  const system = `You are a precise text extractor specialized in academic papers. Extract the abstract content from academic papers.`;
 
-    CRITICAL EXTRACTION RULES:
-    1. Extract ONLY the main abstract paragraph content
-    2. EXCLUDE headers like "ABSTRACT", "Abstract:", "Abstrak:", etc.
-    3. EXCLUDE article metadata like "Article history:", "Received:", "Revised:", "Accepted:", etc.
-    4. EXCLUDE keywords section
-    5. Return the actual descriptive paragraph that explains the research
-    6. Keep original punctuation and formatting exactly as written
-    7. If no abstract content is found, return "ABSTRACT_NOT_FOUND"
+  const content = `Academic paper text: ${text}
+    Extract the abstract content. Return only the main abstract paragraph without headers or metadata.`;
 
-    EXAMPLE:
-    Input: "ABSTRACT\nArticle history:\nReceived Aug 18, 2023\n\nThis research aims to compare..."
-    Output: "This research aims to compare..."`;
-
-  const prompt = `Academic paper text to analyze:
-    ${text}
-
-    Extract ONLY the abstract content paragraph (exclude headers and metadata):`;
+  // Define the response schema
+  const responseSchema = {
+    type: "object",
+    properties: {
+      abstractContent: {
+        type: "string",
+        description:
+          "The extracted abstract content without headers or metadata",
+      },
+      isFound: {
+        type: "boolean",
+        description: "Whether an abstract was successfully found and extracted",
+      },
+    },
+    required: ["abstractContent", "isFound"],
+  };
 
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
-      contents: prompt,
+      contents: content,
       config: {
         systemInstruction: system,
         temperature: 0.1,
         maxOutputTokens: 1000,
+        responseMimeType: "application/json",
+        responseSchema: responseSchema,
       },
     });
 
-    let extractedText = response.text.trim();
+    const responseText = response.text;
+    const parsedResponse = JSON.parse(responseText);
 
     // Return null if AI couldn't find abstract
-    if (extractedText === "ABSTRACT_NOT_FOUND" || extractedText.length < 50) {
+    if (!parsedResponse.isFound || parsedResponse.abstractContent.length < 50) {
       return null;
     }
 
-    // Post-processing: Clean up any remaining headers or metadata
-    extractedText = cleanExtractedAbstract(extractedText);
-
-    return extractedText;
+    return parsedResponse.abstractContent;
   } catch (error) {
     console.error("Error extracting abstract with AI:", error);
     return null;
   }
-}
-
-// Helper function to clean extracted abstract from any remaining headers/metadata
-function cleanExtractedAbstract(text) {
-  // Remove common headers and metadata patterns
-  let cleanedText = text
-    // Remove ABSTRACT headers
-    .replace(/^(ABSTRACT|Abstract|Abstrak):?\s*/i, "")
-    // Remove article history sections
-    .replace(/Article\s+history:?\s*[\s\S]*?(?=\n\n|\n[A-Z])/i, "")
-    // Remove received/revised/accepted lines
-    .replace(/^(Received|Revised|Accepted|Published)[\s\S]*?\n/gim, "")
-    // Remove date patterns (e.g., "Aug 18, 2023", "18 August 2023")
-    .replace(
-      /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\w*\s+\d{1,2},?\s+\d{4}\b/gi,
-      ""
-    )
-    // Remove standalone numbers and years at the beginning
-    .replace(/^\d{1,2}\s+\w+\s+\d{4}\s*/gm, "")
-    // Remove extra whitespace
-    .replace(/\s+/g, " ")
-    .trim();
-
-  const metadataPattern =
-    /^(Article\s+history|Received|Revised|Accepted|Keywords|DOI)/i;
-  if (metadataPattern.test(cleanedText)) {
-    // Find the first sentence that looks like abstract content (starts with capital letter and has research-related words)
-    const sentences = cleanedText.split(/\.\s+/);
-    for (let i = 0; i < sentences.length; i++) {
-      const sentence = sentences[i].trim();
-      if (
-        sentence.length > 50 &&
-        /^[A-Z]/.test(sentence) &&
-        /(research|study|this|analysis|investigation|method|result)/i.test(
-          sentence
-        )
-      ) {
-        // Reconstruct from this sentence onwards
-        cleanedText = sentences.slice(i).join(". ").trim();
-        break;
-      }
-    }
-  }
-
-  return cleanedText;
 }
 
 export async function extractAbstractsFromFiles(files) {
