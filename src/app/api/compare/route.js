@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { extractAbstractsFromFiles } from "@/utils/process-pdf";
 import { getSimilarityFromPython } from "@/utils/call-ST";
 import { generateCreativeResponseGemini } from "@/utils/model-gemini";
-// import { generateCreativeResponseLLM } from "@/utils/model-LLM";
 
 // test get path
 export async function GET() {
@@ -33,30 +32,20 @@ export async function POST(request) {
         text1,
         text2
       );
+
       const roundedSimilarityScore = Math.round(
         getSentenceTransformers.similarity_score * 100
       );
 
-      // const creativeResponse1 = await generateCreativeResponseLLM(
-      //   text1,
-      //   text2,
-      //   getSentenceTransformers
-      // );
-      const creativeResponse2 = await generateCreativeResponseGemini(
+      const creativeResponse = await generateCreativeResponseGemini(
         text1,
         text2,
         getSentenceTransformers.similarity_score,
         getSentenceTransformers.label_english
       );
 
-      // const creativeResponse =
-      //   creativeResponse1 || creativeResponse2 || "No response generated.";
-
-      const creativeResponse = creativeResponse2;
-
       return NextResponse.json({
         success: true,
-        // abstractsDanSaran,
         similarity: {
           text1,
           text2,
