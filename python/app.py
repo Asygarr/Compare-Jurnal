@@ -33,6 +33,8 @@ async def calculate_similarity(data: TextPair):
     t1 = preprocess_text(data.text1)
     t2 = preprocess_text(data.text2)
 
+    print(f"Processing texts:\nText 1: {t1}\nText 2: {t2}")
+
     emb1 = model.encode(t1, convert_to_tensor=True, normalize_embeddings=True)
     emb2 = model.encode(t2, convert_to_tensor=True, normalize_embeddings=True)
     sim  = util.pytorch_cos_sim(emb1, emb2).item()
