@@ -27,7 +27,7 @@ async function extractAbstractWithAI(text) {
   const system = `You are a precise text extractor specialized in academic papers. Extract the abstract content from academic papers.`;
 
   const content = `Academic paper text: ${text}
-    Extract the abstract content. Return only the main abstract paragraph without headers or metadata.`;
+    Extract the abstract content in English. If no English abstract is found, extract the abstract in Indonesian. Return only the main abstract paragraph without headers or metadata.`;
 
   // Define the response schema
   const responseSchema = {
@@ -75,7 +75,7 @@ async function extractAbstractWithAI(text) {
 }
 
 export async function extractAbstractsFromFiles(files) {
-  const abstractsDanKesimpulanSaran = [];
+  const abstractJournal = [];
 
   for (const filePath of files) {
     const fullPath = path.join(process.cwd(), "public", filePath);
@@ -88,11 +88,11 @@ export async function extractAbstractsFromFiles(files) {
     const initialText = getInitialTextForAI(pdfData.text);
     const abstractText = await extractAbstractWithAI(initialText);
 
-    abstractsDanKesimpulanSaran.push({
+    abstractJournal.push({
       file: formattedFileName,
       abstract: abstractText,
     });
   }
 
-  return abstractsDanKesimpulanSaran;
+  return abstractJournal;
 }
