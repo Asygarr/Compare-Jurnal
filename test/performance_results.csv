@@ -1,0 +1,10 @@
+Test,Response Time (seconds),Similarity (%),Status
+Test 1 - Cukup Berkaitan,13.15,30,Success
+Test 2 - Sangat Berkaitan,18.03,75,Success
+Test 3 - Sedikit Berkaitan,15.08,19,Success
+Test 4 - Tidak Relevan,14.73,9,Success
+
+SUMMARY
+Average,15.25,N/A,N/A
+Fastest,13.15,N/A,N/A
+Slowest,18.03,N/A,N/A
