@@ -14,15 +14,14 @@ import seaborn as sns
 import joblib
 import json
 
-# Load data
+# # Load data
 df = pd.read_csv('./dataset/journal-pseudo-label.csv', encoding='latin-1')
 X = df[['pseudo-label']].values
 
-# Gunakan jumlah cluster optimal (4 cluster berdasarkan evaluasi di evaluasi-clustering.py)
-# Hasil evaluasi menunjukkan k=4 optimal berdasarkan Davies-Bouldin Score
+# Hasil evaluasi menunjukkan k=4 optimal berdasarkan 3 metrik evaluasi
 optimal_clusters = 4
 print(f"🎯 Melakukan clustering dengan {optimal_clusters} cluster")
-print("   (Jumlah optimal berdasarkan evaluasi Davies-Bouldin Score)")
+print("   (Jumlah optimal berdasarkan evaluasi 3 metrik)")
 
 # Clustering final
 final_kmeans = KMeans(n_clusters=optimal_clusters, random_state=42).fit(X)
